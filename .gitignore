@@ -1,0 +1,13 @@
+# Keep the data directory but ignore its contents
+data/*
+!data/.gitkeep
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+
+.vscode/
