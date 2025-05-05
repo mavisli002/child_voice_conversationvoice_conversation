@@ -49,40 +49,85 @@ class SpeechRecognizer:
         print(f"Listening... (Speak now, timeout: {self.timeout}s)")
         
         try:
-            with sr.Microphone() as source:
-                # Configure recognizer
-                self.recognizer.energy_threshold = self.energy_threshold
-                self.recognizer.dynamic_energy_threshold = self.dynamic_energy_threshold
+            print("Initializing microphone...")
+            try:
+                # Get list of microphone devices
+                mic_list = sr.Microphone.list_microphone_names()
+                print(f"Available microphones: {mic_list}")
                 
-                # Listen for audio
-                start_time = time.time()
-                audio = self.recognizer.listen(
-                    source, 
-                    timeout=self.timeout, 
-                    phrase_time_limit=self.phrase_time_limit
-                )
-                duration = time.time() - start_time
-                
-                print(f"Audio captured ({duration:.1f}s). Recognizing...")
-                
-                # Try to recognize with Google's speech recognition API
-                try:
-                    text = self.recognizer.recognize_google(audio, language=self.language)
-                    timestamp = datetime.now().strftime("%H:%M:%S")
-                    print(f"[{timestamp}] Recognized: {text}")
-                    return text
-                except sr.UnknownValueError:
-                    print("Could not understand audio")
+                if not mic_list:
+                    print("No microphones detected. Please check your microphone connection.")
                     return ""
-                except sr.RequestError as e:
-                    print(f"Recognition error: {e}")
-                    return ""
-                    
+                
+                # Try to find a suitable microphone - prefer ones with "array" in the name
+                mic_index = None
+                for i, name in enumerate(mic_list):
+                    if "麦克风阵列" in name.lower() and "input" not in name.lower():
+                        mic_index = i
+                        print(f"Selected microphone: {name} (index {i})")
+                        break
+                
+                # Use the selected microphone or default
+                if mic_index is not None:
+                    print(f"Using microphone with index {mic_index}")
+                    with sr.Microphone(device_index=mic_index) as source:
+                        print("Microphone initialized successfully")
+                        # Configure recognizer
+                        self.recognizer.energy_threshold = self.energy_threshold
+                        self.recognizer.dynamic_energy_threshold = self.dynamic_energy_threshold
+                        
+                        print("Waiting for speech...")
+                        # Remove timeout for phrase to start to give user more time
+                        # Only use phrase_time_limit to limit the length of the recording
+                        print("Ready to record. Please start speaking...")
+                        start_time = time.time()
+                        audio = self.recognizer.listen(
+                            source,
+                            phrase_time_limit=min(self.phrase_time_limit, 15) if self.phrase_time_limit else 15
+                        )
+                else:
+                    print("Using default microphone")
+                    with sr.Microphone() as source:
+                        print("Microphone initialized successfully")
+                        # Configure recognizer
+                        self.recognizer.energy_threshold = self.energy_threshold
+                        self.recognizer.dynamic_energy_threshold = self.dynamic_energy_threshold
+                        
+                        print("Waiting for speech...")
+                        # Remove timeout for phrase to start to give user more time
+                        # Only use phrase_time_limit to limit the length of the recording
+                        print("Ready to record. Please start speaking...")
+                        start_time = time.time()
+                        audio = self.recognizer.listen(
+                            source,
+                            phrase_time_limit=min(self.phrase_time_limit, 15) if self.phrase_time_limit else 15
+                        )
+                        duration = time.time() - start_time
+                        print(f"Audio captured ({duration:.1f}s). Recognizing...")
+            except Exception as mic_error:
+                print(f"Microphone error: {mic_error}")
+                return ""
+                
+            # Try to recognize with Google's speech recognition API
+            try:
+                text = self.recognizer.recognize_google(audio, language=self.language)
+                timestamp = datetime.now().strftime("%H:%M:%S")
+                print(f"[{timestamp}] Recognized: {text}")
+                return text
+            except sr.UnknownValueError:
+                print("Could not understand audio")
+                return ""
+            except sr.RequestError as e:
+                print(f"Recognition error: {e}")
+                return ""
+                
         except sr.WaitTimeoutError:
             print("No speech detected within timeout period")
             return ""
         except Exception as e:
             print(f"Error during speech recognition: {e}")
+            import traceback
+            traceback.print_exc()
             return ""
     
     def recognize_from_file(self, audio_file):

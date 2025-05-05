@@ -24,7 +24,12 @@ from voice_assistant.ai_service import generate_response
 load_dotenv()
 
 # Set console encoding to UTF-8
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+try:
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+except Exception as e:
+    print(f"Warning: Could not set encoding: {e}")
+    # Continue anyway
 
 
 def run_voice_assistant(system_prompt="你是一个有帮助的助手"):
@@ -38,6 +43,7 @@ def run_voice_assistant(system_prompt="你是一个有帮助的助手"):
     print("语音对话助手 (Voice Conversation Assistant)")
     print("=" * 50)
     print("提示: 请对着麦克风说话，系统会自动识别并回答")
+    print("      如果语音识别失败，可以直接输入文字")
     print("      说'退出'或'exit'结束对话")
     print("=" * 50)
     
@@ -46,11 +52,26 @@ def run_voice_assistant(system_prompt="你是一个有帮助的助手"):
             count += 1
             print(f"\n[对话 #{count}] 请开始说话...")
             
-            # Get speech input and convert to text
-            user_text = record_and_transcribe(duration=10, language="zh-CN")
+            # Try to get speech input with a timeout
+            try:
+                user_text = record_and_transcribe(duration=5, language="zh-CN")
+            except Exception as e:
+                print(f"语音识别出错: {e}")
+                user_text = ""
+                
+            # If speech recognition failed, fall back to text input
             if not user_text:
-                print("未能识别语音，请重试")
-                continue
+                print("未能识别语音，请直接输入文字:")
+                try:
+                    print("> ", end="")
+                    user_text = input()
+                except (EOFError, KeyboardInterrupt):
+                    print("\n用户终止，退出")
+                    break
+                    
+                if not user_text:
+                    print("未获取到输入，请重试")
+                    continue
                 
             print(f"用户: {user_text}")
             
