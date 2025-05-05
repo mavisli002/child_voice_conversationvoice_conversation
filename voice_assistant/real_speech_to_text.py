@@ -46,17 +46,17 @@ class SpeechRecognizer:
         Returns:
             str: Recognized text, or empty string if recognition failed
         """
-        print(f"Listening... (Speak now, timeout: {self.timeout}s)")
+        print(f"\n🎤 系统已就绪，随时可以开始说话...")
         
         try:
-            print("Initializing microphone...")
+            print("\n📻 正在初始化麦克风...")
             try:
                 # Get list of microphone devices
                 mic_list = sr.Microphone.list_microphone_names()
-                print(f"Available microphones: {mic_list}")
+                print(f"\nℹ️ 可用麦克风: {len(mic_list)} 个")
                 
                 if not mic_list:
-                    print("No microphones detected. Please check your microphone connection.")
+                    print("\n❌ 未检测到麦克风。请检查您的麦克风连接。")
                     return ""
                 
                 # Try to find a suitable microphone - prefer ones with "array" in the name
@@ -64,46 +64,58 @@ class SpeechRecognizer:
                 for i, name in enumerate(mic_list):
                     if "麦克风阵列" in name.lower() and "input" not in name.lower():
                         mic_index = i
-                        print(f"Selected microphone: {name} (index {i})")
+                        print(f"\n✅ 已选择麦克风: {name} (index {i})")
                         break
                 
                 # Use the selected microphone or default
                 if mic_index is not None:
-                    print(f"Using microphone with index {mic_index}")
+                    print(f"\n🎤 正在使用麦克风 {mic_index}")
                     with sr.Microphone(device_index=mic_index) as source:
-                        print("Microphone initialized successfully")
+                        print("\n✅ 麦克风初始化成功")
                         # Configure recognizer
                         self.recognizer.energy_threshold = self.energy_threshold
                         self.recognizer.dynamic_energy_threshold = self.dynamic_energy_threshold
                         
-                        print("Waiting for speech...")
+                        print("\n🔊 等待检测到语音...")
                         # Remove timeout for phrase to start to give user more time
                         # Only use phrase_time_limit to limit the length of the recording
-                        print("Ready to record. Please start speaking...")
+                        print("\n🔴 准备录音中... 请开始说话")
                         start_time = time.time()
-                        audio = self.recognizer.listen(
-                            source,
-                            phrase_time_limit=min(self.phrase_time_limit, 15) if self.phrase_time_limit else 15
-                        )
-                else:
-                    print("Using default microphone")
-                    with sr.Microphone() as source:
-                        print("Microphone initialized successfully")
-                        # Configure recognizer
-                        self.recognizer.energy_threshold = self.energy_threshold
-                        self.recognizer.dynamic_energy_threshold = self.dynamic_energy_threshold
                         
-                        print("Waiting for speech...")
-                        # Remove timeout for phrase to start to give user more time
-                        # Only use phrase_time_limit to limit the length of the recording
-                        print("Ready to record. Please start speaking...")
-                        start_time = time.time()
+                        # Add a message that we're listening
+                        print("\n🔵 正在倒听您的话语...", end="", flush=True)
+                        
                         audio = self.recognizer.listen(
                             source,
                             phrase_time_limit=min(self.phrase_time_limit, 15) if self.phrase_time_limit else 15
                         )
                         duration = time.time() - start_time
-                        print(f"Audio captured ({duration:.1f}s). Recognizing...")
+                        print(f"\n\n✅ 已捕捉音频 ({duration:.1f}秒)")
+                        print("\n🔍 正在识别语音...")
+                else:
+                    print("\n🎤 使用默认麦克风")
+                    with sr.Microphone() as source:
+                        print("\n✅ 麦克风初始化成功")
+                        # Configure recognizer
+                        self.recognizer.energy_threshold = self.energy_threshold
+                        self.recognizer.dynamic_energy_threshold = self.dynamic_energy_threshold
+                        
+                        print("\n🔊 等待检测到语音...")
+                        # Remove timeout for phrase to start to give user more time
+                        # Only use phrase_time_limit to limit the length of the recording
+                        print("\n🔴 准备录音中... 请开始说话")
+                        start_time = time.time()
+                        
+                        # Add a message that we're listening
+                        print("\n🔵 正在倒听您的话语...", end="", flush=True)
+                        
+                        audio = self.recognizer.listen(
+                            source,
+                            phrase_time_limit=min(self.phrase_time_limit, 15) if self.phrase_time_limit else 15
+                        )
+                        duration = time.time() - start_time
+                        print(f"\n\n✅ 已捕捉音频 ({duration:.1f}秒)")
+                        print("\n🔍 正在识别语音...")
             except Exception as mic_error:
                 print(f"Microphone error: {mic_error}")
                 return ""
@@ -180,6 +192,7 @@ def record_and_transcribe(duration=5, language="zh-CN"):
         str: Transcribed text
     """
     try:
+        print("\n🔊 正在初始化语音识别系统...")
         # Initialize recognizer
         recognizer = SpeechRecognizer(
             language=language,
@@ -191,10 +204,13 @@ def record_and_transcribe(duration=5, language="zh-CN"):
         try:
             recognizer.adjust_for_ambient_noise(duration=1)
         except Exception as e:
-            print(f"Could not adjust for ambient noise: {e}")
+            print(f"\n⚠️ 无法调整环境噪音: {e}")
         
         # Recognize speech
+        print("\n🔊 正在等待您说话...")
         text = recognizer.recognize_from_microphone()
+        if text:
+            print(f"\n✅ 语音识别成功")
         return text
         
     except Exception as e:
