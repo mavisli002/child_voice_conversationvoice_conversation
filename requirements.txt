@@ -4,3 +4,5 @@ requests==2.31.0
 PyAudio==0.2.13
 speech_recognition==3.10.0
 pyttsx3==2.90
+Pillow==10.0.0
+customtkinter==5.2.2
