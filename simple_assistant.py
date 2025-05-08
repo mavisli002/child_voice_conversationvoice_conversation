@@ -24,18 +24,24 @@ from voice_assistant.ai_service import generate_response
 ctk.set_appearance_mode("Light")  # 使用浅色主题
 ctk.set_default_color_theme("blue")  # 基础主题，我们会覆盖颜色
 
-# 儿童友好的颜色方案 - 浅橘色系
+# 儿童友好的颜色方案 - 浅橙色系
 KIDS_COLORS = {
-    "bg_main": "#FFF4E6",        # 主背景 - 浅橘黄色
+    "bg_main": "#FFF4E6",        # 主背景 - 浅橙黄色
     "bg_secondary": "#FFDAB9",   # 次要背景 - 浅桃色
-    "accent": "#FF9966",         # 强调色 - 橘色
+    "accent": "#FF9966",         # 强调色 - 橙色
     "accent_hover": "#FF7F50",   # 强调色悬停 - 珊瑚色
-    "user_msg": "#FFE4C4",       # 用户消息 - 浅杏色
+    "user_msg": "#FFE4C4",       # 用户消息 - 浅杨色
     "bot_msg": "#FFDAB9",        # AI消息 - 浅桃色
     "text": "#664433",           # 文本 - 深棕色
     "placeholder": "#AA8866",    # 占位符文本 - 中棕色
-    "border": "#FFCC99",         # 边框 - 橘黄色
-    "error": "#FF6666"           # 错误 - 浅红色
+    "border": "#FFCC99",         # 边框 - 橙黄色
+    "error": "#FF6666",          # 错误 - 浅红色
+    
+    # 儿童友好的颜色
+    "mic_button": "#FF7043",     # 录音按钮 - 深橙色
+    "send_button": "#66BB6A",    # 发送按钮 - 浅绿色
+    "mic_hover": "#E64A19",      # 录音按钮悬停 - 红橙色
+    "send_hover": "#43A047"      # 发送按钮悬停 - 绿色
 }
 
 # 加载环境变量
@@ -152,36 +158,6 @@ class SimpleAssistant(ctk.CTk):
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.main_frame.grid_rowconfigure(0, weight=1)
         
-        # 顶部标题栏 - 更精简的设计
-        self.title_bar = ctk.CTkFrame(
-            self.main_frame, 
-            height=40, 
-            fg_color=KIDS_COLORS["accent"],
-            corner_radius=0
-        )
-        self.title_bar.grid(row=0, column=0, sticky="ew")
-        self.title_bar.grid_propagate(False)
-        
-        # 复合标题设计
-        title_container = ctk.CTkFrame(self.title_bar, fg_color="transparent")
-        title_container.place(relx=0.5, rely=0.5, anchor="center")
-        
-        logo_label = ctk.CTkLabel(
-            title_container,
-            text="💬",  # 说话气泡图标
-            font=("Arial", 14),
-            text_color="white"
-        )
-        logo_label.pack(side="left", padx=(0, 8))
-        
-        title_label = ctk.CTkLabel(
-            title_container,
-            text="对话助手",
-            font=("Arial", 14, "bold"),
-            text_color="white"
-        )
-        title_label.pack(side="left")
-        
         # 聊天区域 - 滚动容器
         self.chat_container = ctk.CTkScrollableFrame(
             self.main_frame, 
@@ -189,12 +165,12 @@ class SimpleAssistant(ctk.CTk):
             scrollbar_button_color=KIDS_COLORS["accent"],
             scrollbar_button_hover_color=KIDS_COLORS["accent_hover"]
         )
-        self.chat_container.grid(row=1, column=0, sticky="nsew", padx=20, pady=(20, 90))
+        self.chat_container.grid(row=0, column=0, sticky="nsew", padx=20, pady=(20, 90))
         
         # 设置底部输入区域容器
         self.input_frame = ctk.CTkFrame(
             self.main_frame, 
-            height=80, 
+            height=70, 
             fg_color=KIDS_COLORS["bg_secondary"],
             corner_radius=20,
             border_width=2,
@@ -204,39 +180,44 @@ class SimpleAssistant(ctk.CTk):
         self.input_frame.grid_columnconfigure(0, weight=1)
         self.input_frame.grid_propagate(False)
         
-        # 输入框容器
+        # 输入框容器 - 使用中心对齐
         input_area = ctk.CTkFrame(self.input_frame, fg_color="transparent")
-        input_area.grid(row=0, column=0, sticky="ew", padx=15, pady=15)
+        input_area.place(relx=0.5, rely=0.5, relwidth=0.95, anchor="center")
         input_area.grid_columnconfigure(1, weight=1)
         
-        # 录音按钮
+        # 设置按钮高度
+        button_height = 28  # 按用户要求调整为28px
+        
+        # 录音按钮 - 添加背景色
         self.mic_button = ctk.CTkButton(
             input_area,
-            text="录音",
-            width=50,
-            height=50,
-            corner_radius=25,
-            fg_color=KIDS_COLORS["accent"],
-            hover_color=KIDS_COLORS["accent_hover"],
-            font=("Arial", 14, "bold"),
+            text="🎤",  # 麦克风图标
+            width=50,  # 保持增大的宽度
+            height=36,  # 保持增大的高度
+            corner_radius=18,  # 保持圆滑边角
+            fg_color=KIDS_COLORS["mic_button"],  # 添加背景色
+            hover_color=KIDS_COLORS["mic_hover"],  # 使用对应的悬停颜色
+            font=("Arial", 24, "bold"),  # 保持大图标
+            text_color="white",  # 文字改回白色
+            border_width=0,  # 保持无边框
             command=self.start_recording
         )
-        self.mic_button.grid(row=0, column=0, padx=(0, 10))
+        self.mic_button.grid(row=0, column=0, padx=(0, 10), sticky="ns")  # 添加ns粘性使其垂直居中
         
         # 录音状态变量
         self.is_recording = False
         
-        # 文本输入框 - 更圆润的形状
+        # 文本输入框 - 降低高度
         self.message_input = ctk.CTkTextbox(
             input_area,
-            height=50,
+            height=30,
             fg_color="white",
             border_color=KIDS_COLORS["border"],
             border_width=2,
-            corner_radius=25,
+            corner_radius=15,
             text_color=KIDS_COLORS["text"]
         )
-        self.message_input.grid(row=0, column=1, sticky="ew")
+        self.message_input.grid(row=0, column=1, sticky="nsew")  # 添加ns使其垂直居中
         self.message_input.bind("<Return>", self.on_enter_pressed)
         
         # 设置占位符文字
@@ -244,19 +225,21 @@ class SimpleAssistant(ctk.CTk):
         self.message_input.bind("<FocusIn>", self.clear_placeholder)
         self.message_input.bind("<FocusOut>", self.add_placeholder)
         
-        # 发送按钮 - 靠右对齐
+        # 发送按钮 - 添加背景色
         self.send_button = ctk.CTkButton(
             input_area,
-            text="发送",
-            width=100,
-            height=50,
-            corner_radius=25,
-            fg_color=KIDS_COLORS["accent"],
-            hover_color=KIDS_COLORS["accent_hover"],
-            font=("Arial", 14, "bold"),
+            text="🛬",  # 纸飞机图标
+            width=50,  # 保持增大的宽度
+            height=36,  # 保持增大的高度
+            corner_radius=18,  # 保持圆滑边角
+            fg_color=KIDS_COLORS["send_button"],  # 添加背景色
+            hover_color=KIDS_COLORS["send_hover"],  # 使用对应的悬停颜色
+            font=("Arial", 24, "bold"),  # 保持大图标
+            text_color="white",  # 文字改回白色
+            border_width=0,  # 保持无边框
             command=self.send_message
         )
-        self.send_button.grid(row=0, column=2, padx=(15, 0), sticky="e")
+        self.send_button.grid(row=0, column=2, padx=(15, 0), sticky="ens")  # 添加ns使其垂直居中
         
         # 状态指示器
         self.status_frame = ctk.CTkFrame(
@@ -428,13 +411,20 @@ class SimpleAssistant(ctk.CTk):
             # 添加用户消息到历史
             self.messages.append({"role": "user", "content": user_text})
             
+            # 首先显示“思考中”消息
+            thinking_message = RoundedMessageFrame(self.chat_container, "正在思考...", is_user=False)
+            thinking_message.pack(fill="x", padx=10, pady=5)
+            # 滚动到底部
+            self.chat_container._parent_canvas.yview_moveto(1.0)
+            
             # 获取AI回复
             ai_response = generate_response(self.messages)
             
             # 添加AI回复到历史
             self.messages.append({"role": "assistant", "content": ai_response})
             
-            # 在主线程中更新UI
+            # 移除“思考中”消息并显示真正的回复
+            thinking_message.destroy()
             self.after(0, lambda: self.add_bot_message(ai_response))
             self.after(0, lambda: self.set_status("正在生成语音..."))
             
