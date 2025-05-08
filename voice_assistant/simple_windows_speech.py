@@ -33,6 +33,16 @@ def simple_record_from_microphone(duration=5, language="zh-CN"):
     """
     # 初始化识别器
     recognizer = sr.Recognizer()
+    recognizer.energy_threshold = 300  # 降低阈值，增强对较小语音的识别
+    recognizer.dynamic_energy_threshold = True  # 动态调整阈值
+    
+    # 选择最适合的语言代码
+    if language.lower().startswith("zh"):
+        # 对于中文，分别尝试简体和繁体
+        language_options = ["zh-CN", "cmn-Hans-CN"]  # 中文简体选项
+    else:
+        # 其他语言
+        language_options = [language]
     
     try:
         print("正在准备麦克风...")
@@ -41,40 +51,47 @@ def simple_record_from_microphone(duration=5, language="zh-CN"):
             print("正在调整环境噪音... (请保持安静)")
             recognizer.adjust_for_ambient_noise(source, duration=1)
             
-            # 录制音频
-            print(f"请开始说话 (最长 {duration} 秒)...")
+            # 提示用户开始说话
+            print(f"请开始说话, 说话完毕自动停止...")
             try:
                 audio = recognizer.listen(source, timeout=2, phrase_time_limit=duration)
-                print("录音完成，正在识别...")
+                print("✔️ 成功捕捉到语音，正在分析...")
             except sr.WaitTimeoutError:
-                print("未检测到语音，请确保麦克风正常工作并再次尝试")
+                print("⚠️ 未检测到语音，请确保麦克风工作正常")
                 return ""
-                
-            # 尝试使用Google识别
+            
+            # 使用多种语言选项尝试
+            for lang in language_options:
+                try:
+                    print(f"正在使用Google语音识别 ({lang})...")
+                    text = recognizer.recognize_google(audio, language=lang)
+                    print(f"识别结果: {text}")
+                    return text
+                except sr.UnknownValueError:
+                    print(f"{lang} 识别失败，尝试其他选项")
+                    continue
+                except sr.RequestError as e:
+                    print(f"Google语音识别服务错误: {e}")
+                    break
+            
+            # 如果在线识别失败，尝试使用Sphinx离线识别
             try:
-                print("正在使用Google语音识别...")
-                text = recognizer.recognize_google(audio, language=language)
-                print(f"识别结果: {text}")
-                return text
-            except sr.UnknownValueError:
-                print("Google无法识别音频")
-            except sr.RequestError as e:
-                print(f"Google语音识别服务错误: {e}")
-                
-            # 尝试使用离线识别
-            try:
-                print("正在使用离线识别...")
+                print("💻 尝试使用离线识别...")
                 text = recognizer.recognize_sphinx(audio)
-                print(f"离线识别结果: {text}")
+                print(f"💾 离线识别结果: {text}")
+                # 将英文转换为中文如果用户选择的是中文
+                if language.lower().startswith("zh") and text:
+                    print("注意: 离线识别结果可能不准确")
                 return text
-            except:
-                print("离线识别失败")
-                
+            except Exception as offline_err:
+                print(f"离线识别失败: {offline_err}")
+            
             # 如果所有尝试都失败
+            print("所有识别方法均失败")
             return ""
     
     except Exception as e:
-        print(f"语音识别错误: {e}")
+        print(f"语音识别总体错误: {e}")
         import traceback
         traceback.print_exc()
         return ""
@@ -140,17 +157,36 @@ def speech_recognition_with_fallback(duration=5, language="zh-CN"):
     """
     print("启动语音识别...")
     
-    # 方法1: 使用简化的麦克风录制
+    # 方法1: 使用简化的麦克风录制 (主要方法)
+    print("尝试方法1: 使用Google语音识别...")
     text = simple_record_from_microphone(duration, language)
-    if text:
+    if text and text.strip() and text != "识别结果将在此显示":
+        print(f"方法1成功识别: '{text}'")
         return text
+    
+    print("方法1失败，尝试其他方法...")
         
-    # 如果在Windows上且方法1失败，尝试使用Windows原生语音识别
-    if platform.system() == 'Windows' and WINDOWS_SPEECH_AVAILABLE:
-        print("尝试使用Windows原生语音识别...")
-        text = windows_native_speech(duration)
-        if text:
-            return text
+    # 跳过Windows原生语音识别，因为它只返回占位符
+    
+    # 尝试使用直接的SpeechRecognition库方法
+    print("尝试方法2: 使用直接的语音识别库...")
+    recognizer = sr.Recognizer()
+    try:
+        with sr.Microphone() as source:
+            print("请开始说话...")
+            recognizer.adjust_for_ambient_noise(source, duration=1)
+            audio = recognizer.listen(source, timeout=2, phrase_time_limit=duration)
+            
+            try:
+                text = recognizer.recognize_google(audio, language=language)
+                print(f"方法2成功识别: '{text}'")
+                return text
+            except sr.UnknownValueError:
+                print("方法2无法识别音频")
+            except sr.RequestError as e:
+                print(f"方法2请求错误: {e}")
+    except Exception as e:
+        print(f"方法2错误: {e}")
     
     # 如果所有方法都失败，要求用户输入文本
     print("\n所有语音识别方法都失败。请输入您的消息:")
