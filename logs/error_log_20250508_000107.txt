@@ -1,0 +1,80 @@
+C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\core_widget_classes\ctk_base_class.py:179: UserWarning: CTkLabel Warning: Given image is not CTkImage but <class 'PIL.ImageTk.PhotoImage'>. Image can not be scaled on HighDPI displays, use CTkImage instead.
+
+  warnings.warn(f"{type(self).__name__} Warning: Given image is not CTkImage but {type(image)}. Image can not be scaled on HighDPI displays, use CTkImage instead.\n")
+Traceback (most recent call last):
+  File "C:\Users\memed\Desktop\voice-conversation\debug_modern_gui.py", line 67, in run_with_error_catching
+    app = ModernVoiceAssistantApp()
+  File "C:\Users\memed\Desktop\voice-conversation\modern_gui.py", line 183, in __init__
+    self.message_frame.add_message(False, "Hello! I'm your voice assistant. How can I help you today?")
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\Desktop\voice-conversation\modern_gui.py", line 111, in add_message
+    bubble = ctk.CTkTextbox(
+        message_frame,
+    ...<7 lines>...
+        activate_scrollbars=False
+    )
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\ctk_textbox.py", line 54, in __init__
+    super().__init__(master=master, bg_color=bg_color, width=width, height=height)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\core_widget_classes\ctk_base_class.py", line 56, in __init__
+    height=self._apply_widget_scaling(self._desired_height))
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\scaling\scaling_base_class.py", line 62, in _apply_widget_scaling
+    return value * self.__widget_scaling
+           ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for *: 'NoneType' and 'float'
+Traceback (most recent call last):
+  File "C:\Users\memed\Desktop\voice-conversation\debug_modern_gui.py", line 67, in run_with_error_catching
+    app = ModernVoiceAssistantApp()
+  File "C:\Users\memed\Desktop\voice-conversation\modern_gui.py", line 183, in __init__
+    self.message_frame.add_message(False, "Hello! I'm your voice assistant. How can I help you today?")
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\Desktop\voice-conversation\modern_gui.py", line 111, in add_message
+    bubble = ctk.CTkTextbox(
+        message_frame,
+    ...<7 lines>...
+        activate_scrollbars=False
+    )
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\ctk_textbox.py", line 54, in __init__
+    super().__init__(master=master, bg_color=bg_color, width=width, height=height)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\core_widget_classes\ctk_base_class.py", line 56, in __init__
+    height=self._apply_widget_scaling(self._desired_height))
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\scaling\scaling_base_class.py", line 62, in _apply_widget_scaling
+    return value * self.__widget_scaling
+           ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for *: 'NoneType' and 'float'
+Traceback (most recent call last):
+  File "C:\Users\memed\Desktop\voice-conversation\debug_modern_gui.py", line 67, in run_with_error_catching
+    app = ModernVoiceAssistantApp()
+  File "C:\Users\memed\Desktop\voice-conversation\modern_gui.py", line 183, in __init__
+    self.message_frame.add_message(False, "Hello! I'm your voice assistant. How can I help you today?")
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\Desktop\voice-conversation\modern_gui.py", line 111, in add_message
+    bubble = ctk.CTkTextbox(
+        message_frame,
+    ...<7 lines>...
+        activate_scrollbars=False
+    )
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\ctk_textbox.py", line 54, in __init__
+    super().__init__(master=master, bg_color=bg_color, width=width, height=height)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\core_widget_classes\ctk_base_class.py", line 56, in __init__
+    height=self._apply_widget_scaling(self._desired_height))
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\memed\AppData\Local\Programs\Python\Python313\Lib\site-packages\customtkinter\windows\widgets\scaling\scaling_base_class.py", line 62, in _apply_widget_scaling
+    return value * self.__widget_scaling
+           ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for *: 'NoneType' and 'float'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\memed\Desktop\voice-conversation\debug_modern_gui.py", line 88, in <module>
+    run_with_error_catching()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\memed\Desktop\voice-conversation\debug_modern_gui.py", line 85, in run_with_error_catching
+    input("按Enter键退出...")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^
+EOFError: EOF when reading a line
