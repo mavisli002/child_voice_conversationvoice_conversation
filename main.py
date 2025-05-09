@@ -278,78 +278,20 @@ def main():
     print("2. 语音模式 (语音输入/语音输出)")
     print("=" * 50)
     
+    choice = "1"  # 默认为文本模式
     try:
         choice = input("请输入选择 (1 或 2): ")
-    except EOFError:
+    except (EOFError, KeyboardInterrupt):
         print("\n输入错误，默认选择文本模式")
-        choice = "1"
-    
-    if choice == "1":
-        run_text_assistant(system_prompt="你是一个有帮助的助手，请简洁明了地回答问题")
-    elif choice == "2":
-        run_voice_assistant(system_prompt="你是一个有帮助的助手，请简洁明了地回答问题")
-    else:
-        print("无效选择，请重新运行程序并选择 1 或 2")
-
-    print("      输入'退出'或'exit'结束对话")
     
     try:
-        while True:
-            count += 1
-            print("\n等待用户输入...")
-            
-            # Get speech input and convert to text
-            user_text = record_and_transcribe()
-            if not user_text:
-                print("未能识别语音，请重试")
-                continue
-                
-            print(f"用户: {user_text}")
-            
-            # Check if user wants to exit
-            if any(exit_phrase in user_text.lower() for exit_phrase in EXIT_PHRASES):
-                print("检测到退出指令，结束对话")
-                break
-            
-            # Add user message to conversation history
-            messages.append({"role": "user", "content": user_text})
-            
-            # Generate AI response
-            print("AI正在思考...")
-            ai_response = generate_response(messages)
-            print(f"助手: {ai_response}")
-            
-            # Add assistant response to conversation history
-            messages.append({"role": "assistant", "content": ai_response})
-            
-            # Convert AI response to speech
-            print("生成语音回复...")
-            mp3_filename = f"response_{count}.mp3"
-            # Pass the output filename, but audio will be saved in data directory
-            synthesize_speech(ai_response, mp3_filename)
-            
-            # Play the generated speech directly in the current window using pygame
-            try:
-                print(f"正在播放语音回复...")
-                # Get full path to the audio file
-                audio_path = str(pathlib.Path("data") / mp3_filename)
-                
-                # Stop any currently playing audio
-                pygame.mixer.music.stop()
-                
-                # Load and play the audio file
-                pygame.mixer.music.load(audio_path)
-                pygame.mixer.music.play()
-                
-                # Wait for the audio to finish playing
-                while pygame.mixer.music.get_busy():
-                    time.sleep(0.1)
-                    
-                print("语音播放完成")
-            except Exception as e:
-                print(f"播放语音时出错: {e}")
-                print(f"音频文件已保存至 {mp3_filename}")
-    
+        if choice == "1":
+            run_text_assistant(system_prompt="你是一个有帮助的助手，请简洁明了地回答问题")
+        elif choice == "2":
+            run_voice_assistant(system_prompt="你是一个有帮助的助手，请简洁明了地回答问题")
+        else:
+            print("无效选择，默认使用文本模式")
+            run_text_assistant(system_prompt="你是一个有帮助的助手，请简洁明了地回答问题")
     except KeyboardInterrupt:
         print("\n用户终止，退出")
     except Exception as e:

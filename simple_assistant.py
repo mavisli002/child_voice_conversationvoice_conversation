@@ -133,6 +133,9 @@ class SimpleAssistant(ctk.CTk):
         
         # 显示欢迎消息
         self.add_bot_message("你好！我是你的对话助手。请在下方输入框中输入你想说的话，我会用语音回复你。")
+        
+        # 播放欢迎语音（延迟1秒，确保界面已加载）
+        self.after(1000, self.play_welcome_message)
     
     def setup_tts_engine(self):
         """设置文字转语音引擎"""
@@ -311,6 +314,17 @@ class SimpleAssistant(ctk.CTk):
         if self.is_processing or self.is_recording:
             return
             
+        # 停止任何正在播放的音频
+        if pygame.mixer.music.get_busy():
+            print("停止正在播放的音频...")
+            pygame.mixer.music.stop()
+        
+        # 停止TTS引擎
+        try:
+            self.tts_engine.stop()
+        except:
+            pass
+            
         self.is_recording = True
         self.set_status("正在录音...请对着麦克风说话")
         self.mic_button.configure(text="停止", fg_color="#FF6666")
@@ -442,35 +456,68 @@ class SimpleAssistant(ctk.CTk):
     def speak_text(self, text):
         """使用pyttsx3直接播放文本"""
         try:
-            self.after(0, lambda: self.set_status("正在说话..."))
-            
-            # 使用线程来避免界面冻结
-            def do_speak():
-                self.tts_engine.say(text)
-                self.tts_engine.runAndWait()
-                self.after(0, lambda: self.set_status("准备好啦！"))
-            
-            # 启动新线程进行语音合成和播放
-            threading.Thread(target=do_speak, daemon=True).start()
-            
-        except Exception as e:
-            print(f"语音播放错误: {e}")
-            self.after(0, lambda: self.set_status(f"语音播放错误: {e}"))
-            # 尝试使用备用方法
+            # 先尝试使用备用方法，即直接生成音频文件并使用pygame播放
+            # 这种方法对多次连续对话更稳定
             try:
                 # 导入文本转语音模块
                 from voice_assistant.text_to_speech import synthesize_speech
-                # 转换为语音文件
-                mp3_filename = f"response_{self.count}.mp3"
+                
+                # 设置状态
+                self.after(0, lambda: self.set_status("正在生成语音..."))
+                
+                # 转换为语音文件，使用递增的计数器确保文件名不重复
+                mp3_filename = f"response_{self.count}_{int(time.time())}.mp3"
                 success = synthesize_speech(text, mp3_filename)
                 
                 if success:
                     # 使用pygame播放
                     self.play_audio_with_pygame(mp3_filename)
+                    return  # 成功则直接返回
                 else:
-                    self.after(0, lambda: self.set_status("无法生成语音，但你可以阅读回复"))
+                    print("生成音频文件失败，尝试备用方法...")
+            except Exception as e:
+                print(f"音频文件生成错误: {e}，尝试备用TTS引擎...")
+            
+            # 如果备用方法失败，尝试使用pyttsx3
+            self.after(0, lambda: self.set_status("正在语音合成..."))
+            
+            # 确保先停止之前的TTS引擎
+            try:
+                self.tts_engine.stop()
             except:
+                pass
+            
+            # 重新初始化TTS引擎
+            try:
+                self.tts_engine = pyttsx3.init()
+                self.tts_engine.setProperty('rate', 150)  # 语速适中
+                voices = self.tts_engine.getProperty('voices')
+                for voice in voices:
+                    if "chinese" in voice.id.lower() or "mandarin" in voice.id.lower():
+                        self.tts_engine.setProperty('voice', voice.id)
+                        break
+            except Exception as e:
+                print(f"TTS引擎初始化错误: {e}")
                 self.after(0, lambda: self.set_status("无法生成语音，但你可以阅读回复"))
+                return
+            
+            # 使用线程来避免界面冻结
+            def do_speak():
+                try:
+                    self.after(0, lambda: self.set_status("正在说话..."))
+                    self.tts_engine.say(text)
+                    self.tts_engine.runAndWait()
+                    self.after(0, lambda: self.set_status("准备好啦！"))
+                except Exception as e:
+                    print(f"TTS语音播放失败: {e}")
+                    self.after(0, lambda: self.set_status("语音播放错误"))
+            
+            # 启动新线程进行语音合成和播放
+            threading.Thread(target=do_speak, daemon=True).start()
+            
+        except Exception as e:
+            print(f"语音播放总错误: {e}")
+            self.after(0, lambda: self.set_status(f"无法生成语音，但你可以阅读回复"))
     
     def play_audio_with_pygame(self, mp3_filename):
         """使用pygame播放音频文件"""
@@ -488,17 +535,34 @@ class SimpleAssistant(ctk.CTk):
             # 停止任何当前播放的音频
             pygame.mixer.music.stop()
             
-            # 加载并播放音频文件
-            pygame.mixer.music.load(audio_path)
-            pygame.mixer.music.play()
+            # 在子线程中播放音频，这样不会阻塞界面
+            def play_audio_thread():
+                try:
+                    # 加载并播放音频文件
+                    pygame.mixer.music.load(audio_path)
+                    pygame.mixer.music.play()
+                    
+                    # 等待音频播放完成，但允许外部中断
+                    while pygame.mixer.music.get_busy() and not self.is_recording:
+                        time.sleep(0.1)
+                        
+                    # 只有在非录音状态下更新状态
+                    if not self.is_recording:
+                        self.after(0, lambda: self.set_status("准备好啦！"))
+                except Exception as e:
+                    print(f"音频播放线程错误: {e}")
             
-            # 等待音频播放完成
-            while pygame.mixer.music.get_busy():
-                time.sleep(0.1)
+            # 启动新线程进行音频播放
+            threading.Thread(target=play_audio_thread, daemon=True).start()
             
-            self.after(0, lambda: self.set_status("准备好啦！"))
         except Exception as e:
             self.after(0, lambda: self.set_status(f"播放音频出错: {e}"))
+    
+    def play_welcome_message(self):
+        """播放欢迎语音"""
+        # 播放简短的欢迎语
+        welcome_text = "你好，我是你的AI助手"
+        self.speak_text(welcome_text)
     
     def clear_chat(self):
         """清空对话记录"""
@@ -513,6 +577,9 @@ class SimpleAssistant(ctk.CTk):
         # 显示欢迎消息
         self.add_bot_message("你好！我是你的对话助手。请在下方输入框中输入你想说的话，我会用语音回复你。")
         self.set_status("对话已清空")
+        
+        # 播放欢迎语音
+        self.after(500, self.play_welcome_message)
     
     def on_closing(self):
         """关闭窗口时的处理"""
