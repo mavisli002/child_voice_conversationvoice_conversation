@@ -84,6 +84,7 @@ python main.py
 一款专为儿童设计的语音对话助手，可以讲故事、回答问题，提供温馨友好的交流体验。本项目专注于核心功能：语音输入、AI回应和语音输出，特别针对Windows系统优化。
 
 🌟 特色功能
+
 友好的橘色界面：专为儿童设计的温暖橘色调界面，视觉舒适
 双重交互模式：
 语音模式：说话即可得到AI回应，更自然流畅
@@ -95,32 +96,37 @@ Google在线识别
 离线识别
 Windows原生语音识别
 一键打包版本：无需安装Python，普通用户可直接使用
+
 💻 适用场景
+
 儿童睡前故事：温馨的故事陪伴，培养语言能力
 知识问答：回答儿童好奇的各种问题
 学习辅助：帮助解释课程内容，提供学习支持
 休闲娱乐：与AI进行有趣互动，丰富儿童课余生活
+
+
+
 📋 项目结构
-simple_assistant.py - 儿童友好的GUI语音助手（推荐使用）
-main.py - 命令行版语音对话助手
-voice_assistant/ - 核心功能模块：
-windows_speech.py - Windows专用语音识别
-ai_service.py - AI对话服务
-text_to_speech.py - 语音合成服务
-data/ - 生成的媒体文件和对话记录存储
-dist/语音助手.exe - 打包好的可执行文件，可直接运行
+  simple_assistant.py - 儿童友好的GUI语音助手（推荐使用）
+  main.py - 命令行版语音对话助手
+  voice_assistant/ - 核心功能模块：
+  windows_speech.py - Windows专用语音识别
+  ai_service.py - AI对话服务
+  text_to_speech.py - 语音合成服务
+  data/ - 生成的媒体文件和对话记录存储
+  dist/语音助手.exe - 打包好的可执行文件，可直接运行
 🚀 快速开始
-方法1：直接使用可执行文件（推荐）
-普通用户可以直接双击 dist/语音助手.exe 文件运行，无需任何安装步骤。
+  方法1：直接使用可执行文件（推荐）
+  普通用户可以直接双击 dist/语音助手.exe 文件运行，无需任何安装步骤。
 
 方法2：开发者使用Python运行
-安装依赖：
+  安装依赖：
 
-pip install -r requirements.txt
-运行图形界面版本：
+  pip install -r requirements.txt
+  运行图形界面版本：
 
-python simple_assistant.py
-或运行命令行版本：
+  python simple_assistant.py
+  或运行命令行版本：
 
 python main.py
 🎯 使用指南
