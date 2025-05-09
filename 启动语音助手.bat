@@ -1,0 +1,3 @@
+@echo off
+echo 正在启动语音助手...
+start dist\语音助手.exe
