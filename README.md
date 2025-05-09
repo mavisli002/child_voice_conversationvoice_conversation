@@ -80,7 +80,7 @@ python main.py
 - Microphone for voice input (voice mode only)
 - Internet connection for API access
 
-儿童陪伴故事语音助手
+#儿童陪伴故事语音助手
 一款专为儿童设计的语音对话助手，可以讲故事、回答问题，提供温馨友好的交流体验。本项目专注于核心功能：语音输入、AI回应和语音输出，特别针对Windows系统优化。
 
 🌟 特色功能
@@ -108,13 +108,21 @@ Windows原生语音识别
 
 📋 项目结构
   simple_assistant.py - 儿童友好的GUI语音助手（推荐使用）
+  
   main.py - 命令行版语音对话助手
+  
   voice_assistant/ - 核心功能模块：
+  
   windows_speech.py - Windows专用语音识别
+
   ai_service.py - AI对话服务
+  
   text_to_speech.py - 语音合成服务
+  
   data/ - 生成的媒体文件和对话记录存储
+  
   dist/语音助手.exe - 打包好的可执行文件，可直接运行
+  
 🚀 快速开始
   方法1：直接使用可执行文件（推荐）
   普通用户可以直接双击 dist/语音助手.exe 文件运行，无需任何安装步骤。
